@@ -13,7 +13,12 @@ interface SignUpPageProps {
   onsubmit: (event: FormEvent) => Promise<void>;
 }
 
-function SignUpPage({ signin_link, onsubmit, pagepic, children }: SignUpPageProps) {
+function SignUpPage({
+  signin_link,
+  onsubmit,
+  pagepic,
+  children,
+}: SignUpPageProps) {
   const { signupFormElement } = children;
   return (
     <div className="entire-signup-page-container">
@@ -36,12 +41,11 @@ function SignUpPage({ signin_link, onsubmit, pagepic, children }: SignUpPageProp
         </div>
 
         <div className="form-section">
-        
           <div className="whole-sign-up-form-container">
-          
-            
             <div className="sign-in-form-container">
-            <Link to="/" className="style-home-btn"><i className="fa-solid fa-house home-btn "></i></Link>
+              <Link to="/" className="style-home-btn">
+                <i className="fa-solid fa-house home-btn "></i>
+              </Link>
               <div className="sign-in-form-message">
                 Create QuickGrade Account
               </div>
@@ -56,7 +60,6 @@ function SignUpPage({ signin_link, onsubmit, pagepic, children }: SignUpPageProp
               Already Created an Account? Sign in
               <Link to={signin_link}> here</Link>
             </div>
-
           </div>
         </div>
       </div>

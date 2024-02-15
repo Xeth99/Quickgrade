@@ -1,10 +1,11 @@
-import { Link, useParams, useNavigate } from "react-router-dom";
-import SideBar from "../../../components/sidebar/sideBar";
+import { useParams, useNavigate } from "react-router-dom";
+import MainButton from "../../../components/buttons/mainButton";
 import "./TakeExamOBJ.css";
 import { FormEvent, useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosInstance";
 import { useAuth } from "../../../components/protectedRoutes/protectedRoute";
 import Header from "../../../components/header/header";
+import StudentSideBar from "../studentsSideBar/studentsSideBar";
 
 interface Question {
   questionText: string;
@@ -50,7 +51,7 @@ const TakeExamOBJ = () => {
   useEffect(() => {
     async function fetchData() {
       const res = await axiosInstance.get(
-        `students/dashboard/take-exams/${courseCode}`
+        `/students/dashboard/take-exams/${courseCode}`
       );
 
       // checking the response
@@ -106,7 +107,6 @@ const TakeExamOBJ = () => {
       const selectedOption = selectedOptions.find(
         (item) => item.questionId === question.questionId
       );
-      console.log("Selected Option:", selectedOption);
       return {
         questionId: question.questionId,
         questionType: question.questionType,
@@ -115,12 +115,11 @@ const TakeExamOBJ = () => {
       };
     });
 
-    console.log("Assembled Questions:", assembledQuestions);
     const courseCode = examsDetail?.courseCode;
     const studentId = studentData?.studentId;
     const examId = examsDetail?.examId;
     const sendStudentResponse = await axiosInstance.post(
-      `http://localhost:3000/lecturers/grade-exam-objectives/${courseCode}`,
+      `/lecturers/grade-exam-objectives/${courseCode}`,
       {
         examId,
         studentId,
@@ -144,47 +143,7 @@ const TakeExamOBJ = () => {
   };
   return (
     <div className="take-exam-Container">
-      <SideBar>
-        {{
-          sidebarElement: (
-            <>
-              <div className="feature-2">
-                <img
-                  className="img-feat"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-menu.svg"
-                />
-                <Link to="/students/dashboard" className="text-wrapper-6">
-                  Dashboard
-                </Link>
-              </div>
-              <div className="feature-2">
-                <img
-                  className="img-2"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-book-square.svg"
-                />
-                <Link
-                  to="/students/dashboard/enrolled-courses"
-                  className="text-wrapper-6"
-                >
-                  Enrolled Courses
-                </Link>
-              </div>
-              <div className="feature-2">
-                <img
-                  className="img-2"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-sort.svg"
-                />
-                <Link
-                  to="/students/dashboard/results"
-                  className="text-wrapper-6"
-                >
-                  Results
-                </Link>
-              </div>
-            </>
-          ),
-        }}
-      </SideBar>
+      <StudentSideBar />
 
       <div className="student-take-exam-body-wrapper">
         <Header newUser={studentData?.firstName || ""} />
@@ -281,7 +240,11 @@ const TakeExamOBJ = () => {
                     <br />
                     <input
                       type="text"
-                      value={examsDetail?.totalScore}
+                      value={
+                        examsDetail?.secondSection.length
+                          ? examsDetail?.totalScore
+                          : examsDetail?.firstSection.split("|")[1]
+                      }
                       className="input-form-1"
                     />
                   </div>
@@ -309,7 +272,11 @@ const TakeExamOBJ = () => {
                 </p>
                 <div className="sub-div">
                   <p>Total score</p>
-                  <div className="green-circle">{examsDetail?.totalScore}</div>
+                  <div className="green-circle">
+                    {examsDetail?.secondSection.length
+                      ? examsDetail?.totalScore
+                      : examsDetail?.firstSection.split("|")[1]}
+                  </div>
                 </div>
               </div>
 
@@ -624,9 +591,7 @@ const TakeExamOBJ = () => {
                 })}
               </div>
               <div className="take-exam-submit-container">
-                <button className="submit-btn" type="submit">
-                  Submit exam
-                </button>
+                <MainButton button_text="Submit Exam" />
               </div>
 
               {/* <div className="anchor-div">

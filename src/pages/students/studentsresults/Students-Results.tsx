@@ -1,12 +1,11 @@
 import "./Students-Results.css";
-import SideBar from "../../../components/sidebar/sideBar";
-import { Link, useNavigate } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosInstance";
 import { useAuth } from "../../../components/protectedRoutes/protectedRoute";
 import searchButton from "../../../assets/searchButton.png";
 import Header from "../../../components/header/header";
+import StudentSideBar from "../studentsSideBar/studentsSideBar";
 
 interface EnrolledExam {
   courseId: string;
@@ -24,7 +23,6 @@ interface StudentResult {
 
 function StudentsResults() {
   const { studentData } = useAuth();
-  console.log("student", studentData);
   const navigate = useNavigate();
   const [studentResults, setStudentResults] = useState<StudentResult[]>([]);
   const [selectedSemester, setSelectedSemester] =
@@ -32,7 +30,6 @@ function StudentsResults() {
   const [enrolledExam, setEnrolledExam] = useState<EnrolledExam[]>([]);
 
   useEffect(() => {
-    console.log("studentData", studentData?.studentId);
     const fetchData = async () => {
       try {
         const res = await axiosInstance.get("/students/dashboard/get-results", {
@@ -69,47 +66,7 @@ function StudentsResults() {
 
   return (
     <div className="students-Results-main-body-wrapper">
-      <SideBar>
-        {{
-          sidebarElement: (
-            <>
-              <div className="feature-2">
-                <img
-                  className="img-feat"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-menu.svg"
-                />
-                <Link to="/students/dashboard" className="text-wrapper-6">
-                  Dashboard
-                </Link>
-              </div>
-              <div className="feature-2">
-                <img
-                  className="img-2"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-book-square.svg"
-                />
-                <Link
-                  to="/students/dashboard/enrolled-courses"
-                  className="text-wrapper-6"
-                >
-                  Enrolled Courses
-                </Link>
-              </div>
-              <div className="feature-2">
-                <img
-                  className="img-2"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-sort.svg"
-                />
-                <Link
-                  to="/students/dashboard/results"
-                  className="text-wrapper-6"
-                >
-                  Results
-                </Link>
-              </div>
-            </>
-          ),
-        }}
-      </SideBar>
+      <StudentSideBar />
       <div className="students-Results-right-body-wrapper">
         <Header newUser={studentData?.firstName || ""} />
 
@@ -170,14 +127,17 @@ function StudentsResults() {
                           <>
                             <div key={index} className="middle-card">
                               <div className="middle-left">
-                                <p className="noresults">{result.totalScore}</p>
+                                <p className="noresults">
+                                  {parseFloat(result.totalScore.toFixed(2))}
+                                </p>
                                 <h4 className="totalscore">Total Score</h4>
                               </div>
                               <div className="middle-right">
                                 <p className="not-ready">
                                   Section A
                                   <span>
-                                    {result.totalScore}/{result.sectionMark}
+                                    {parseFloat(result.totalScore.toFixed(2))}/
+                                    {parseFloat(result.sectionMark.toFixed(2))}
                                   </span>
                                 </p>
                               </div>

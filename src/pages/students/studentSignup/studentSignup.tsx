@@ -36,7 +36,6 @@ export default function StudentSignup() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    console.log("userRole: ", email);
 
     if (
       !firstName ||
@@ -96,7 +95,7 @@ export default function StudentSignup() {
 
   return (
     <SignUpPage
-      signin_link="/lecturers/signin"
+      signin_link="/students/signin"
       onsubmit={handleSubmit}
       pagepic={studentPic}
     >

@@ -1,15 +1,17 @@
-import "./StudentsChangePassword.css";
-import SideBar from "../../../components/sidebar/sideBar";
-import { Link } from "react-router-dom";
+import "./changePasswordPage.css";
+import { useLocation } from "react-router-dom";
 import { FormEvent } from "react";
-import axiosInstance from "../../../utils/axiosInstance";
+import axiosInstance from "../../utils/axiosInstance";
 import { useState } from "react";
-import MainButton from "../../../components/buttons/mainButton";
-import { useAuth } from "../../../components/protectedRoutes/protectedRoute";
-import Header from "../../../components/header/header";
+import MainButton from "../../components/buttons/mainButton";
+import { useAuth } from "../../components/protectedRoutes/protectedRoute";
+import Header from "../../components/header/header";
+import StudentSideBar from "../students/studentsSideBar/studentsSideBar";
+import LecturerSideBar from "../lecturers/lecturerSideBar/lecturerSideBar";
 
-function StudentsChangePassword() {
-  const studentData = useAuth();
+function ChangePasswordPage() {
+  const location = useLocation();
+  const { studentData, lecturerData } = useAuth();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -19,6 +21,9 @@ function StudentsChangePassword() {
 
   const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const URL = location.pathname.startsWith("/students")
+      ? "/students"
+      : "/lecturers";
 
     // Validate the form fields
     if (!oldPassword || !newPassword || !confirmNewPassword) {
@@ -34,12 +39,9 @@ function StudentsChangePassword() {
 
     // API call to update password
     try {
-      const res = await axiosInstance.put(
-        "/students/dashboard/change-password",
-        {
-          newPassword: newPassword,
-        }
-      );
+      const res = await axiosInstance.put(`/${URL}/dashboard/change-password`, {
+        newPassword: newPassword,
+      });
 
       if (res.status === 200) {
         if (res.data.passwordChangedSuccessfully) {
@@ -47,6 +49,13 @@ function StudentsChangePassword() {
           setOldPassword("");
           setNewPassword("");
           setConfirmNewPassword("");
+        } else if (
+          res.data.noTokenError ||
+          res.data.verificationError ||
+          res.data.error ||
+          res.data.tokenExpiredError
+        ) {
+          setError("unathorized kindly sign in again");
         } else if (res.data.unknownStudent) {
           setError("Student not Found");
         }
@@ -54,7 +63,6 @@ function StudentsChangePassword() {
         setError("Failed to update password");
       }
     } catch (error) {
-      console.error("Error updating password:", error);
       setError("Internal Server Error");
     }
   };
@@ -62,49 +70,19 @@ function StudentsChangePassword() {
   return (
     <>
       <div className="change-password-container">
-        <SideBar>
-          {{
-            sidebarElement: (
-              <>
-                <div className="feature-2">
-                  <img
-                    className="img-feat"
-                    src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-menu.svg"
-                  />
-                  <Link to="/students/dashboard" className="text-wrapper-6">
-                    Dashboard
-                  </Link>
-                </div>
-                <div className="feature-2">
-                  <img
-                    className="img-2"
-                    src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-book-square.svg"
-                  />
-                  <Link
-                    to="/students/dashboard/enrolled-courses"
-                    className="text-wrapper-6"
-                  >
-                    Enrolled Courses
-                  </Link>
-                </div>
-                <div className="feature-2">
-                  <img
-                    className="img-2"
-                    src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-sort.svg"
-                  />
-                  <Link
-                    to="/students/dashboard/results"
-                    className="text-wrapper-6"
-                  >
-                    Results
-                  </Link>
-                </div>
-              </>
-            ),
-          }}
-        </SideBar>
+        {location.pathname.startsWith("/students") ? (
+          <StudentSideBar />
+        ) : location.pathname.startsWith("/lecturers") ? (
+          <LecturerSideBar />
+        ) : null}
         <div className="change-password-body">
-          <Header newUser={studentData?.studentData?.firstName || ""} />
+          <Header
+            newUser={
+              (location.pathname.startsWith("/students")
+                ? studentData?.firstName
+                : `${lecturerData?.title} ${lecturerData?.firstName}`) as string
+            }
+          />
           <div className="change-password-form">
             <h3>Change Password</h3>
 
@@ -160,4 +138,4 @@ function StudentsChangePassword() {
   );
 }
 
-export default StudentsChangePassword;
+export default ChangePasswordPage;

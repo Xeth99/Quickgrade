@@ -1,12 +1,12 @@
 import "./StudentDash.css";
 import { useState, useEffect, MouseEvent } from "react";
 import axiosInstance from "../../../utils/axiosInstance";
-import { Link, useNavigate } from "react-router-dom";
-import SideBar from "../../../components/sidebar/sideBar";
+import { useNavigate } from "react-router-dom";
 import Header from "../../../components/header/header";
 import BlueHeader from "../../../components/header/blueHeader/blueHeader";
 
 import { useAuth } from "../../../components/protectedRoutes/protectedRoute";
+import StudentSideBar from "../studentsSideBar/studentsSideBar";
 
 interface Course {
   courseId: string;
@@ -38,7 +38,6 @@ export const StudentDash = () => {
           (studentRes.data.noSemesterSelected ||
             studentRes.data.internalServeError)
         ) {
-          console.log("No semester selected or internal server error")
           navigate("/students/signin");
         } else if (studentRes.status === 200 && studentRes.data.courses) {
           setCourses(studentRes.data.courses);
@@ -54,47 +53,7 @@ export const StudentDash = () => {
 
   return (
     <div className="student-dashboard-container">
-      <SideBar>
-        {{
-          sidebarElement: (
-            <>
-              <div className="feature-2">
-                <img
-                  className="img-feat"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-menu.svg"
-                />
-                <Link to="/students/dashboard" className="text-wrapper-6">
-                  Dashboard
-                </Link>
-              </div>
-              <div className="feature-2">
-                <img
-                  className="img-2"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-book-square.svg"
-                />
-                <Link
-                  to="/students/dashboard/enrolled-courses"
-                  className="text-wrapper-6"
-                >
-                  Enrolled Courses
-                </Link>
-              </div>
-              <div className="feature-2">
-                <img
-                  className="img-2"
-                  src="https://c.animaapp.com/IX1zE9E9/img/vuesax-bulk-sort.svg"
-                />
-                <Link
-                  to="/students/dashboard/results"
-                  className="text-wrapper-6"
-                >
-                  Results
-                </Link>
-              </div>
-            </>
-          ),
-        }}
-      </SideBar>
+      <StudentSideBar />
 
       <div className="student-dashboard-body">
         <Header newUser={studentData?.firstName || ""} />

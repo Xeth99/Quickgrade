@@ -54,7 +54,8 @@ export function LoginPage(props: Props) {
           })
         : null;
       if (res && res.status === 200) {
-        if (res.data.successfulLogin) {
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
           navigate(`${baseURL}/dashboard`);
         }
         else if (res.data.inValidPassword) {
@@ -75,7 +76,6 @@ export function LoginPage(props: Props) {
         setError("Internal Server Error");
       }
     } catch (error) {
-      console.log("error", error);
       setError("Internal Server Error");
     }
 
