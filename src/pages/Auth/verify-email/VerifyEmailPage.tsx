@@ -1,5 +1,5 @@
 import "./verify-email.css";
-import quickgradelogo from "../../assets/quick_grade_logo_with_text_blue.png";
+import quickgradelogo from "../../../assets/quick_grade_logo_with_text_blue.png";
 function VerifyEmail() {
   return (
     <div className="verify-email-body-wrapper">

@@ -18,4 +18,5 @@ export const LeftImageWrapper = styled.div<LeftImageWrapperProps>`
   text-align: left;
   font-family: var(--main-font);
   position: relative;
+  hidden: hidden;
 `;

@@ -1,7 +1,7 @@
 import axiosInstance from "../../../utils/axiosInstance";
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import SignUpPage from "../../../components/signup/signUpPage";
+import SignUpPage from "../../Auth/signup/signUpPage";
 import studentPic from "../../../assets/sign_up_page_bg_pic copy.png";
 
 export default function StudentSignup() {

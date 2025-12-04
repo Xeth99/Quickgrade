@@ -1,10 +1,10 @@
-import axiosInstance from "../../utils/axiosInstance";
+import axiosInstance from "../../../utils/axiosInstance";
 import { LeftImageWrapper } from "./Login_background";
-import "./Login_style.css";
-import Footer from "../../components/footer/footer";
+import Footer from "../../footer/footer";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import MainButton from "../../components/buttons/mainButton";
+import MainButton from "../../../components/buttons/mainButton";
+import { BiHide, BiShow } from "react-icons/bi";
 interface Props {
   id_or_email: string;
   placeholder: string;
@@ -19,6 +19,7 @@ export function LoginPage(props: Props) {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPass, setShowPass] = useState(false);
 
   const handleUserID = (event: ChangeEvent<HTMLInputElement>) => {
     setUserId((event.currentTarget as HTMLInputElement).value);
@@ -57,8 +58,7 @@ export function LoginPage(props: Props) {
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
           navigate(`${baseURL}/dashboard`);
-        }
-        else if (res.data.inValidPassword) {
+        } else if (res.data.inValidPassword) {
           setError("Invalid password");
           setUserId("");
           setPassword("");
@@ -71,8 +71,7 @@ export function LoginPage(props: Props) {
           setUserId("");
           setPassword("");
         }
-      }
-      else {
+      } else {
         setError("Internal Server Error");
       }
     } catch (error) {
@@ -82,46 +81,88 @@ export function LoginPage(props: Props) {
     // redirect to a different page based on user type
   };
 
+  const handleShowPass = () => {
+    setShowPass(!showPass);
+  };
+
   return (
-    <div className="login-page-main-body-wrapper">
-      <div className="login-form-inner-body-wrapper">
-        <LeftImageWrapper backgroundpic={props.backgroundimage}>
-          <h1 className="university-title">Camouflage University</h1>
-          <p className="moto-wrapper">Inspiring greatness through education</p>
+    <div className="h-screen flex-col overflow-y-hidden items-center">
+      <div className="h-[90%] flex">
+        <LeftImageWrapper
+          backgroundpic={props.backgroundimage}
+          className="hidden md:flex"
+        >
+          <div>
+            <h1 className="text-[2rem] text-secondary">
+              Camouflage University
+            </h1>
+            <p className="text-white text-[1rem]">
+              Inspiring greatness through education
+            </p>
+          </div>
         </LeftImageWrapper>
 
-        <div className="login-form-wrapper">
-          <form className="login-form" onSubmit={handleSubmit}>
+        <div className="h-full w-full md:w-[50%] relative">
+          <form
+            className="top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 h-[80%] w-[70%] bg-[#f9fafb] align-left"
+            onSubmit={handleSubmit}
+          >
             <Link to="/">
               <i className="fa-solid fa-house home-btn "></i>
             </Link>
-            <h1 className="login-form-title">{props.form_title}</h1>
+            <h1 className="text-[1.5rem] mb-4 md:text-[2rem]">
+              Sign in to Quickgrade
+            </h1>
 
-            {error && <div className="error-message">{error} </div>}
-
-            <div className="field">
-              <label className="login-form-label">{props.id_or_email}</label>
+            <div className="mb-4">
+              <label className="block mt-[0.7rem] mb-[0.5rem] text-[1rem]">
+                {props.id_or_email}
+              </label>
               <input
-                className="login-form-input"
+                className="border-[1px] border-[#bdbdbd] w-[100%] h-[3rem] rounded p-[1rem]"
                 type="text"
                 value={userId}
                 onChange={handleUserID}
                 placeholder={props.placeholder}
               />
+              {error && (
+                <div className="text-[0.5rem] text-error"> {error} </div>
+              )}
             </div>
-            <div className="field">
-              <label className="login-form-label">Password</label>
-              <div className="password-icon-wrapper">
-                <i className="fa-solid fa-lock login-form-password-icon"></i>
+
+            <div className="mb-4">
+              <label className="block mt-[0.7rem] mb-[0.5rem] text-[1rem]">
+                Password
+              </label>
+              <div className="flex h-[3rem] border-[1px] border-[#bdbdbd] rounded p-[1rem] w-[100%]">
                 <input
-                  className="password_input"
-                  type="password"
+                  className="flex-1 outline-none"
+                  type={showPass ? "text" : "password"}
                   value={password}
                   onChange={handlePassword}
                   placeholder="Enter password"
                 />
+                {showPass ? (
+                  <BiShow
+                    size={20}
+                    onClick={handleShowPass}
+                    className="text-primaryVar cursor-pointer"
+                  />
+                ) : (
+                  <BiHide
+                    size={20}
+                    onClick={handleShowPass}
+                    className="text-primaryVar cursor-pointer"
+                  />
+                )}
               </div>
-              <Link className="login-form-forgot-password" to={props.userType}>
+              {error && (
+                <div className="text-[0.5rem] text-error"> {error} </div>
+              )}
+              <Link
+                className="text-primaryVar text-[0.8rem]"
+                to={props.userType}
+              >
                 {" "}
                 Forgot password?
               </Link>
@@ -130,7 +171,7 @@ export function LoginPage(props: Props) {
           </form>
         </div>
       </div>
-      <Footer footer_text="blue-text" />
+      <Footer />
     </div>
   );
 }

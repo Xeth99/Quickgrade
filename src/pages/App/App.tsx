@@ -1,5 +1,6 @@
-import { LoginPage } from "../loginPage/Login";
-import "./App.css";
+import { LoginPage } from "../Auth/loginPage/Login";
+// import "../../index.css";
+// import "./App.css";
 import student_login_page_bg from "../../assets/loginBackground.png";
 import lecturer_login_page_bg from "../../assets/lecturer_signin_bg.png";
 import { Routes, Route } from "react-router-dom";
@@ -7,7 +8,7 @@ import LandingPage from "../landingPage/LandingPage";
 import EnterOtp from "../enter-otp/enter_otp";
 import ResetEnterNewPasswordPage from "../reset-enter-new-password/Reset_enter_new_pw";
 import LecturerDashboard from "../lecturers/lecturerDashboard/LecturerDashboard";
-import VerifyEmail from "../verify-email/VerifyEmailPage";
+import VerifyEmail from "../Auth/verify-email/VerifyEmailPage";
 import StudentEnrolledCourses from "../students/studentEnrolledCourses/studentEnrolledCourses";
 import LecturerSignup from "../lecturers/lecturerSignUp/lecturerSignup";
 import StudentSignup from "../students/studentSignup/studentSignup";
@@ -31,6 +32,7 @@ import LecturerGrades from "../lecturers/lecturesGradeExam/lec_grade";
 
 import GradeExamPage from "../grade_exams_page/GradeExamPage";
 import GradeExamTheory from "../gradeExamTheory/GradeExamTheory";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -216,6 +218,7 @@ function App() {
           element={<GradeExamTheory />}
         />
       </Routes>
+      <ToastContainer />
     </>
   );
 }
