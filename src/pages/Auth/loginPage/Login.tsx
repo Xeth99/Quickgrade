@@ -21,6 +21,8 @@ export function LoginPage(props: Props) {
   const [error, setError] = useState("");
   const [showPass, setShowPass] = useState(false);
 
+  const currentRoute = location.pathname;
+
   const handleUserID = (event: ChangeEvent<HTMLInputElement>) => {
     setUserId((event.currentTarget as HTMLInputElement).value);
   };
@@ -37,7 +39,6 @@ export function LoginPage(props: Props) {
     }
 
     try {
-      const currentRoute = location.pathname;
       const baseURL = currentRoute.startsWith("/students")
         ? "/students"
         : currentRoute.startsWith("/lecturers")
@@ -108,7 +109,7 @@ export function LoginPage(props: Props) {
             onSubmit={handleSubmit}
           >
             <Link to="/">
-              <i className="fa-solid fa-house home-btn "></i>
+              <i className="fa-solid fa-house home-btn text-primaryVar"></i>
             </Link>
             <h1 className="text-[1.5rem] mb-4 md:text-[2rem]">
               Sign in to Quickgrade
@@ -167,7 +168,20 @@ export function LoginPage(props: Props) {
                 Forgot password?
               </Link>
             </div>
-            <MainButton button_text="Sign in" />
+            <MainButton button_text="Sign in" className="w-full" />
+            <div className="text-[12px]  mt-[1rem]">
+              Don't have an account?{" "}
+              <Link
+                to={
+                  currentRoute === "/lecturers"
+                    ? "/lecturers/signup"
+                    : "/students/signup"
+                }
+                className="text-primaryVar underline"
+              >
+                Sign up
+              </Link>
+            </div>
           </form>
         </div>
       </div>

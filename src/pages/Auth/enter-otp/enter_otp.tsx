@@ -1,15 +1,10 @@
-import "./enter_otp.css";
-import quickgradelogo from "../../assets/quick_grade_logo_with_text_blue.png";
+import quickgradelogo from "../../../assets/quick_grade_logo_with_text_blue.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, ChangeEvent, FormEvent } from "react";
-import axiosInstance from "../../utils/axiosInstance";
-import MainButton from "../../components/buttons/mainButton";
+import axiosInstance from "../../../utils/axiosInstance";
+import MainButton from "../../../components/buttons/mainButton";
 
-interface EnterOtpProps {
-  enter_otp_heading: string;
-}
-
-function EnterOtp(props: EnterOtpProps) {
+function EnterOtp() {
   const navigate = useNavigate();
   const location = useLocation();
   const [otp, setOtp] = useState("");
@@ -56,16 +51,17 @@ function EnterOtp(props: EnterOtpProps) {
     // redirect to a different page based on user type
   };
   return (
-    <div className="reset-otp-page-body-wrapper">
-      <header className="reset-otp-header">
+    <div className="items-center max-w-[500px] mx-auto">
+      <header className="text-center mt-[1rem] flex justify-center md:mt-[5rem]">
         <img src={quickgradelogo} alt="Quickgrade Logo" />
       </header>
 
-      <div className="reset-otp-page-app">
-        <h1 className="reset-otp-heading">{props.enter_otp_heading}</h1>
-        <label className="reset-otp-label">
-          Enter the OTP sent to your email:
-        </label>
+      <div className="shadow-lg p-4 justify-center items-center mt-[5rem] border border-white rounded-md mx-4">
+        <h1 className="text-center my-[1.5rem] text-lg">Verify OTP</h1>
+        <span className="mb-[1.5rem]">
+          {" "}
+          <label>Enter the OTP sent to your email:</label>
+        </span>
 
         <form onSubmit={handleSubmit}>
           <input
@@ -76,10 +72,13 @@ function EnterOtp(props: EnterOtpProps) {
             required
             value={otp}
             onChange={handleUserOtp}
-            className="reset-otp-input"
+            className="w-full border border-[#D0D5DD] rounded-[8px] p-3 mt-2"
           />
-          <MainButton button_text="Submit" />
         </form>
+        <MainButton
+          button_text="Submit"
+          className="mt-[3rem] w-full text-center"
+        />
       </div>
     </div>
   );

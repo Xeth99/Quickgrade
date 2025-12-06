@@ -31,7 +31,7 @@
     "**/*.tsx",
     "**/**/*.ts",
     "**/**/*.tsx",
-    "src/pages/forgotPassword"
+    "src/pages/Auth/forgotPassword"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

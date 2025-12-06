@@ -1,15 +1,19 @@
-import "./verify-email.css";
 import quickgradelogo from "../../../assets/quick_grade_logo_with_text_blue.png";
 function VerifyEmail() {
   return (
-    <div className="verify-email-body-wrapper">
-      <header className="headerEmail">
+    <div className="mx-auto max-w-[500px] justify-center items-center">
+      <header className="text-center mt-[1rem] flex justify-center md:mt-[5rem]">
         <img src={quickgradelogo} alt="Quickgrade Logo" />
       </header>
 
-      <div className="appEmail">
-        <h1 className="verify-email-heading"> Verify your Email Address </h1>
-        <label className="verify-email-label">Input your email address:</label>
+      <div className="items-center mx-auto shadow-lg justify-center p-4">
+        <h1 className="text-center font-semibold my-4">
+          {" "}
+          Verify your Email Address{" "}
+        </h1>
+        <label className="text-textcolor text-[14px]">
+          Input your email address:
+        </label>
 
         <form action="#" method="post">
           <input
@@ -18,10 +22,13 @@ function VerifyEmail() {
             name="otp"
             placeholder="Enter Email Address"
             required
-            className="verify-email-input"
+            className="w-full border border-[#D0D5DD] rounded-[8px] p-3 mt-2"
           />
 
-          <button type="submit" className="verify-email-input-btn">
+          <button
+            type="submit"
+            className="mt-4 bg-primaryVar p-2 w-full text-white rounded"
+          >
             Submit
           </button>
         </form>

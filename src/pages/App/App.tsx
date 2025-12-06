@@ -5,15 +5,15 @@ import student_login_page_bg from "../../assets/loginBackground.png";
 import lecturer_login_page_bg from "../../assets/lecturer_signin_bg.png";
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "../landingPage/LandingPage";
-import EnterOtp from "../enter-otp/enter_otp";
+import EnterOtp from "../Auth/enter-otp/enter_otp";
 import ResetEnterNewPasswordPage from "../reset-enter-new-password/Reset_enter_new_pw";
 import LecturerDashboard from "../lecturers/lecturerDashboard/LecturerDashboard";
 import VerifyEmail from "../Auth/verify-email/VerifyEmailPage";
 import StudentEnrolledCourses from "../students/studentEnrolledCourses/studentEnrolledCourses";
 import LecturerSignup from "../lecturers/lecturerSignUp/lecturerSignup";
 import StudentSignup from "../students/studentSignup/studentSignup";
-import { CheckYourEmail } from "../check-you-email/check_your_email";
-import { ForgotPassword } from "../forgotPassword/forget_password";
+import { CheckYourEmail } from "../Auth/check-you-email/check_your_email";
+import { ForgotPassword } from "../Auth/forgotPassword/forget_password";
 import LecturerResults from "../lecturers/LecturerResultsPage/LecturerResults";
 import { StudentDash } from "../students/studentDashboard/StudentDash";
 import StudentTakeExamsInstructions from "../students/studentTakeExamsInstructions/studentTakeExamsInstructions";
@@ -127,14 +127,8 @@ function App() {
             />
           }
         />
-        <Route
-          path="/students/confirm-email"
-          element={<EnterOtp enter_otp_heading="Verify OTP" />}
-        />
-        <Route
-          path="/lecturers/confirm-email"
-          element={<EnterOtp enter_otp_heading="Verify OTP" />}
-        />
+        <Route path="/students/confirm-email" element={<EnterOtp />} />
+        <Route path="/lecturers/confirm-email" element={<EnterOtp />} />
         {/* forgot password page
         where you enter your email
         */}

@@ -1,4 +1,3 @@
-import "./Reset_enter_new_pw.css";
 import quickgradelogo from "../../assets/quick_grade_logo_with_text_blue.png";
 import MainButton from "../../components/buttons/mainButton";
 import { useParams } from "react-router-dom";
@@ -48,18 +47,20 @@ const ResetEnterNewPasswordPage = () => {
     }
   };
   return (
-    <div className="re-enter-password-wrapper">
-      <div className="re-enter-password-header">
+    <div className="max-w-[500px] justify-center items-center mx-auto">
+      <div className="flex items-center justify-center mx-auto mt-[1rem]">
         <img src={quickgradelogo} alt="logo png" />
       </div>
-      <div className="re-enter-password-container">
-        <div className="form-container">
-          <h1 className="form-title">Reset Password</h1>
+      <div className="shadow-lg justify-center mx-4 p-2 items-center">
+        <div className="">
+          <h1 className="font-bold text-[20px] text-center mb-4">
+            Reset Password
+          </h1>
 
-          <form className="form" onSubmit={handleSubmit}>
-            <div className="form-inner-container">
-              <label className="re-enter-password-label" htmlFor="password">
-                New Password
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="flex flex-col">
+              <label className="" htmlFor="password">
+                New Password:
               </label>
               <input
                 type="password"
@@ -69,14 +70,15 @@ const ResetEnterNewPasswordPage = () => {
                 required
                 value={password}
                 onChange={handleUserPassword}
-                className="re-enter-password-input"
+                className="p-2 border w-full rounded-lg"
               />
-
+            </div>
+            <div className="flex flex-col">
               <label
                 className="re-enter-password-label"
                 htmlFor="confirm-password"
               >
-                Confirm Password
+                Confirm Password:
               </label>
               <input
                 type="password"
@@ -84,9 +86,9 @@ const ResetEnterNewPasswordPage = () => {
                 name="confirm-password"
                 id="confirm-password"
                 required
-                className="re-enter-password-input"
+                className="p-2 border w-full rounded-lg"
               />
-              <MainButton button_text="Reset Password" />
+              <MainButton button_text="Reset Password" className="mt-6" />
             </div>
           </form>
         </div>
