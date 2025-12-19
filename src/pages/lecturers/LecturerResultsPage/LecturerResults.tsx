@@ -1,5 +1,5 @@
 import "./LecturerResults.css";
-import "../lecturerDashboard/LecturerDashboard.css"
+import "../lecturerDashboard/LecturerDashboard.css";
 import "../../../assets/menu-board.png";
 import LecturerSideBar from "../lecturerSideBar/lecturerSideBar";
 import { useAuth } from "../../../components/protectedRoutes/protectedRoute";
@@ -11,8 +11,10 @@ const LecturerResults = () => {
   const { lecturerData } = useAuth();
   return (
     <div>
-     <LecturerSideBar />
-      <Header newUser={`${lecturerData?.title} ${lecturerData?.firstName}`} />
+      <LecturerSideBar />
+      <Header
+        newUser={`${lecturerData?.title} ${lecturerData?.firstName} ${lecturerData?.lastName}`}
+      />
       <ResultsContents />
       <ResultsTable />
     </div>

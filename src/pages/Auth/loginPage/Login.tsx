@@ -1,86 +1,27 @@
 import axiosInstance from "../../../utils/axiosInstance";
-import { LeftImageWrapper } from "./Login_background";
 import Footer from "../../footer/footer";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import MainButton from "../../../components/buttons/mainButton";
-import { BiHide, BiShow } from "react-icons/bi";
-interface Props {
-  id_or_email: string;
-  placeholder: string;
-  form_title: string;
-  backgroundimage: string;
-  userType: string;
-}
+import { Formik, Form } from "formik";
+import ToastContainerComponent from "../../../components/notifications/Notifications";
+import LightAuthInput from "../../../components/LightAuthInput";
+import PasswordInput from "../../../components/PasswordInput";
+import AuthButton from "../../../components/AuthButton";
+import lecturerImg from "../../../assets/lecturers.jpg";
+import studentImg from "../../../assets/loginBackground.png";
 
-export function LoginPage(props: Props) {
+const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const currentRoute = location.pathname;
 
-  const handleUserID = (event: ChangeEvent<HTMLInputElement>) => {
-    setUserId((event.currentTarget as HTMLInputElement).value);
-  };
-  const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
-    setPassword((event.currentTarget as HTMLInputElement).value);
-  };
+  const isStudentRoute = currentRoute.startsWith("/students");
+  const isLecturerRoute = currentRoute.startsWith("/lecturers");
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-
-    if (!userId || !password) {
-      setError("All fields are required, try again");
-      return;
-    }
-
-    try {
-      const baseURL = currentRoute.startsWith("/students")
-        ? "/students"
-        : currentRoute.startsWith("/lecturers")
-        ? "/lecturers"
-        : "";
-      const res = currentRoute.startsWith("/students")
-        ? await axiosInstance.post("/students/login", {
-            matricNo: userId,
-            password: password,
-          })
-        : currentRoute.startsWith("/lecturers")
-        ? await axiosInstance.post("/lecturers/login", {
-            employeeID: userId,
-            password: password,
-          })
-        : null;
-      if (res && res.status === 200) {
-        if (res.data.token) {
-          localStorage.setItem("token", res.data.token);
-          navigate(`${baseURL}/dashboard`);
-        } else if (res.data.inValidPassword) {
-          setError("Invalid password");
-          setUserId("");
-          setPassword("");
-        } else if (res.data.studentNotFoundError) {
-          setError("Student not found, invalid registration number");
-          setUserId("");
-          setPassword("");
-        } else if (res.data.lecturerNotFoundError) {
-          setError("Lecturer not found, invalid employee id");
-          setUserId("");
-          setPassword("");
-        }
-      } else {
-        setError("Internal Server Error");
-      }
-    } catch (error) {
-      setError("Internal Server Error");
-    }
-
-    // redirect to a different page based on user type
-  };
+  const baseUrl = isStudentRoute ? "/students" : "/lecturers";
 
   const handleShowPass = () => {
     setShowPass(!showPass);
@@ -89,11 +30,13 @@ export function LoginPage(props: Props) {
   return (
     <div className="h-screen flex-col overflow-y-hidden items-center">
       <div className="h-[90%] flex">
-        <LeftImageWrapper
-          backgroundpic={props.backgroundimage}
-          className="hidden md:flex"
-        >
-          <div>
+        <div className="hidden md:flex relative w-[50%]">
+          <img
+            src={isLecturerRoute ? lecturerImg : studentImg}
+            alt="login background"
+            className="object-cover w-full h-full"
+          />
+          <div className="absolute top-2 left-2">
             <h1 className="text-[2rem] text-secondary">
               Camouflage University
             </h1>
@@ -101,91 +44,96 @@ export function LoginPage(props: Props) {
               Inspiring greatness through education
             </p>
           </div>
-        </LeftImageWrapper>
+        </div>
 
         <div className="h-full w-full md:w-[50%] relative">
-          <form
-            className="top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 h-[80%] w-[70%] bg-[#f9fafb] align-left"
-            onSubmit={handleSubmit}
-          >
-            <Link to="/">
-              <i className="fa-solid fa-house home-btn text-primaryVar"></i>
-            </Link>
-            <h1 className="text-[1.5rem] mb-4 md:text-[2rem]">
-              Sign in to Quickgrade
-            </h1>
+          <Formik
+            initialValues={{
+              userId: "",
+              password: "",
+            }}
+            onSubmit={async (values, { setErrors, resetForm }) => {
+              setLoading(true);
+              try {
+                const endpoint = isStudentRoute
+                  ? "/students/login"
+                  : "/lecturers/login";
+                const payload = isStudentRoute
+                  ? { matricNo: values.userId, password: values.password }
+                  : { employeeID: values.userId, password: values.password };
 
-            <div className="mb-4">
-              <label className="block mt-[0.7rem] mb-[0.5rem] text-[1rem]">
-                {props.id_or_email}
-              </label>
-              <input
-                className="border-[1px] border-[#bdbdbd] w-[100%] h-[3rem] rounded p-[1rem]"
-                type="text"
-                value={userId}
-                onChange={handleUserID}
-                placeholder={props.placeholder}
-              />
-              {error && (
-                <div className="text-[0.5rem] text-error"> {error} </div>
-              )}
-            </div>
+                const res = await axiosInstance.post(endpoint, payload);
 
-            <div className="mb-4">
-              <label className="block mt-[0.7rem] mb-[0.5rem] text-[1rem]">
-                Password
-              </label>
-              <div className="flex h-[3rem] border-[1px] border-[#bdbdbd] rounded p-[1rem] w-[100%]">
-                <input
-                  className="flex-1 outline-none"
-                  type={showPass ? "text" : "password"}
-                  value={password}
-                  onChange={handlePassword}
-                  placeholder="Enter password"
-                />
-                {showPass ? (
-                  <BiShow
-                    size={20}
-                    onClick={handleShowPass}
-                    className="text-primaryVar cursor-pointer"
-                  />
-                ) : (
-                  <BiHide
-                    size={20}
-                    onClick={handleShowPass}
-                    className="text-primaryVar cursor-pointer"
-                  />
-                )}
-              </div>
-              {error && (
-                <div className="text-[0.5rem] text-error"> {error} </div>
-              )}
-              <Link
-                className="text-primaryVar text-[0.8rem]"
-                to={props.userType}
-              >
-                {" "}
-                Forgot password?
-              </Link>
-            </div>
-            <MainButton button_text="Sign in" className="w-full" />
-            <div className="text-[12px]  mt-[1rem]">
-              Don't have an account?{" "}
-              <Link
-                to={
-                  currentRoute === "/lecturers"
-                    ? "/lecturers/signup"
-                    : "/students/signup"
+                if (res.data.token) {
+                  localStorage.setItem("token", res.data.token);
+                  navigate(`${baseUrl}/dashboard`);
+                } else if (res.data.inValidPassword) {
+                  ToastContainerComponent.error(res.data.inValidPassword);
+                } else if (res.data.studentNotFoundError) {
+                  ToastContainerComponent.error(res.data.studentNotFoundError);
+                  setErrors({
+                    userId: "Student not found, invalid registration number",
+                  });
+                } else if (res.data.lecturerNotFoundError) {
+                  ToastContainerComponent.error(res.data.lecturerNotFoundError);
+                  setErrors({
+                    userId: "Lecturer not found, invalid employee id",
+                  });
                 }
-                className="text-primaryVar underline"
-              >
-                Sign up
-              </Link>
-            </div>
-          </form>
+              } catch (error) {
+                ToastContainerComponent.error("Internal Server Error");
+                setErrors({ userId: "Internal Server Error" });
+                resetForm();
+              } finally {
+                setLoading(false);
+              }
+            }}
+          >
+            {({ isValid, dirty }) => (
+              <Form className="top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 h-[80%] w-[70%] bg-[#f9fafb] align-left">
+                <Link to="/">
+                  <i className="fa-solid fa-house home-btn text-primaryVar"></i>
+                </Link>
+                <h1 className="text-[1.5rem] mb-4 md:text-[2rem]">
+                  Sign in to EloQuence
+                </h1>
+                <LightAuthInput
+                  label="Employee ID"
+                  name="userId"
+                  type="text"
+                  placeholder="Enter employee ID"
+                  className="mb-4"
+                />
+                <PasswordInput
+                  name="password"
+                  label="Password"
+                  placeholder="Enter password"
+                  show={showPass}
+                  toggleShow={handleShowPass}
+                  className="mb-4"
+                />
+                <AuthButton isLoading={loading} disabled={!isValid || !dirty}>
+                  Sign in
+                </AuthButton>
+                <div className="text-[12px]  mt-[1rem]">
+                  Don't have an account?{" "}
+                  <Link
+                    to={
+                      isLecturerRoute ? "/lecturers/signup" : "/students/signup"
+                    }
+                    className="text-primaryVar text-[14px]"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              </Form>
+            )}
+          </Formik>
         </div>
       </div>
       <Footer />
     </div>
   );
-}
+};
+
+export default LoginPage;

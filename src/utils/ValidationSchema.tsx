@@ -7,3 +7,9 @@ export const studentSchema = yup.object({
   faculty: yup.string().required("Faculty is required"),
   department: yup.string().required("Department is required"),
 });
+
+export const sectionSchema = yup.object({
+  questionType: yup.string().required("Section is required"),
+  sectionAlphabet: yup.string().required("Section Alphabet is required"),
+  scoreObtainable: yup.string().required("Score Obtainable is required"),
+});

@@ -10,6 +10,10 @@ module.exports = {
         error: "#ff0000",
         tertiary: "#fac515",
         textcolor: "#3D3C3A",
+         disabled: "#F0F0F0",
+        disabledtext: "#C4C4C4",
+        authbordercolor: "#BDBDBD",
+        lightgrey: "#eaecf0"
       },
       fontFamily: {
         PoppinsBold: ["PoppinsBold", "sans-serif"],

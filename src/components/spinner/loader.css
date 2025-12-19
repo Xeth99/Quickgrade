@@ -1,0 +1,22 @@
+.loader-circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  animation: rotate 2s linear infinite;
+}
+
+.loader-circle span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 40px;
+  font-size: 14px;
+  color: #4a4afc;
+  font-weight: bold;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}

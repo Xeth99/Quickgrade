@@ -3,49 +3,56 @@ import addButton from "../../../assets/add_button_logo copy.png";
 import { useAuth } from "../../../components/protectedRoutes/protectedRoute";
 import LecturerSideBar from "../lecturerSideBar/lecturerSideBar";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosInstance";
 import Header from "../../../components/header/header";
-
-interface Question {
-  type: "objectives" | "theory" | "fill-in-the-blank";
-  questionText: string;
-  optionA: string;
-  optionB: string;
-  optionC: string;
-  optionD: string;
-  correctAnswer: string;
-}
-
-interface Section {
-  questions: Question[];
-}
-
-interface SectionValue {
-  sectionAlphabet: string;
-  ScoreObtainable: string;
-  questionType: string;
-}
+import { Question, Section, SectionValue } from "../../../utils/TypeProps";
+import { Form, Formik } from "formik";
+import LightAuthInput from "../../../components/LightAuthInput";
+import RadioInput from "../../../components/RadioInput";
+import ToastContainerComponent from "../../../components/notifications/Notifications";
+import SelectInputWithLabel from "../../../components/SelectInput";
+import SelectInputExam from "../../../components/SelectInputExam";
+import { sectionSchema } from "../../../utils/ValidationSchema";
 
 function SetExamPage() {
+  const [courseDetails, setCourseDetails] = useState([]);
+  const [sectionValue, setSectionValue] = useState<SectionValue[]>([]);
+  const [popup, setPopup] = useState(false);
+  const [sectionDetailCopy, setSectionDetailCopy] = useState({
+    sectionAlphabet: "",
+    scoreObtainable: "",
+    questionType: "",
+  });
+  const [sections, setSections] = useState<Section[]>([
+    { questions: [] },
+    { questions: [] },
+    { questions: [] },
+  ]);
+  const [sectionDetail, setSectionDetail] = useState({
+    sectionAlphabet: "",
+    scoreObtainable: "",
+    questionType: "",
+  });
+  const [totalScore, setTotalScore] = useState("");
+  const [examDuration, setexamDuration] = useState("");
+  const [courseCode, setCourseCode] = useState("");
+  const [department, setDepartment] = useState("");
+  const [semester, setSemester] = useState("");
+  const [session, setSession] = useState("");
+  const [faculty, setFaculty] = useState("");
+  const [examDate, setExamDate] = useState("");
+  const [courseTitle, setCourseTitle] = useState("");
+  const [section, setSection] = useState("blank-section");
+  const [instruction, setInstruction] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
   const { lecturerData } = useAuth();
   const navigate = useNavigate();
-  // section handling state
-  const [sectionValue, setSectionValue] = useState<SectionValue[]>([]);
 
-  const [popup, setPopup] = useState(false);
   const toggleAddSectionModal = () => {
     setPopup(!popup);
   };
-
-  const [sectionDetail, setSectionDetail] = useState({
-    sectionAlphabet: "",
-    ScoreObtainable: "",
-    questionType: "",
-  });
-
-  const [section, setSection] = useState("blank-section");
-  const [instruction, setInstruction] = useState("");
 
   const nextSectionToggle = () => {
     sectionValue.forEach((EachSection, index) => {
@@ -63,19 +70,13 @@ function SetExamPage() {
     });
     // setCurrentSection((prevIndex) => (prevIndex - 1) % sectionValue.length);
   };
-  const [sectionDetailCopy, setSectionDetailCopy] = useState({
-    sectionAlphabet: "",
-    ScoreObtainable: "",
-    questionType: "",
-  });
-  const handleAddSectionModalSubmitForm = (e: FormEvent) => {
-    e.preventDefault();
-    const updatedSectionDetail = JSON.parse(JSON.stringify(sectionDetail));
+
+  const handleAddSectionModalSubmitForm = (values: SectionValue) => {
     setSectionDetailCopy((prev) => ({
       ...prev,
-      sectionAlphabet: updatedSectionDetail.sectionAlphabet,
-      ScoreObtainable: updatedSectionDetail.ScoreObtainable,
-      questionType: updatedSectionDetail.questionType,
+      sectionAlphabet: values.sectionAlphabet,
+      scoreObtainable: values.scoreObtainable,
+      questionType: values.questionType,
     }));
     toggleAddSectionModal();
   };
@@ -84,7 +85,7 @@ function SetExamPage() {
       setSection(sectionDetailCopy.questionType);
       setSectionDetail({
         sectionAlphabet: "",
-        ScoreObtainable: "",
+        scoreObtainable: "",
         questionType: "",
       });
       // Check if there is a questionType before updating
@@ -98,7 +99,7 @@ function SetExamPage() {
   }, [sectionDetailCopy]);
 
   // fetchting each course detail frm the backedn
-  const [courseDetails, setCourseDetails] = useState([]);
+
   useEffect(() => {
     fetchCourseDetails();
     return;
@@ -110,12 +111,6 @@ function SetExamPage() {
   };
 
   //
-  const [sections, setSections] = useState<Section[]>([
-    { questions: [] },
-    { questions: [] },
-    { questions: [] },
-  ]);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
 
   const handleQuestionChange = (
     sectionIndex: number,
@@ -184,16 +179,6 @@ function SetExamPage() {
     updatedSections[sectionIndex].questions.splice(questionIndex, 1);
     setSections(updatedSections);
   };
-
-  const [totalScore, setTotalScore] = useState("");
-  const [examDuration, setexamDuration] = useState("");
-  const [courseCode, setCourseCode] = useState("");
-  const [department, setDepartment] = useState("");
-  const [semester, setSemester] = useState("");
-  const [session, setSession] = useState("");
-  const [faculty, setFaculty] = useState("");
-  const [examDate, setExamDate] = useState("");
-  const [courseTitle, setCourseTitle] = useState("");
 
   const isObjectivesSectionValid = (section: Section) => {
     return section.questions.every((question) => {
@@ -274,452 +259,247 @@ function SetExamPage() {
     });
   };
 
-  const submitQuestions = async (e: FormEvent) => {
-    e.preventDefault();
-    const assembledQuestions: Question[] = sections.reduce(
-      (allQuestions, section) => allQuestions.concat(section.questions),
-      [] as Question[]
-    );
+  const assembledQuestions: Question[] = sections.reduce(
+    (allQuestions, section) => allQuestions.concat(section.questions),
+    [] as Question[]
+  );
+  const submitQuestions = async (values: any) => {
+    setLoading(true);
     try {
-      const res = await axiosInstance.post("/lecturers/set-exam", {
-        examDuration,
-        courseCode,
-        semester,
-        session,
-        instruction,
-        courseTitle,
-        faculty,
-        sections: sectionValue,
-        lecturerId: lecturerData?.lecturerId,
-        department,
-        examDate,
-        totalScore: Number(totalScore),
-        questions: assembledQuestions,
-      });
-
+      const res = await axiosInstance.post("/lecturers/set-exam", values);
       if (res.status === 200 && res.data.examQuestionCreated) {
+        ToastContainerComponent.success("Exam questions created successfully");
         navigate(`/lecturers/dashboard/set-exams/success/${courseCode}`);
       }
     } catch (error) {
-      console.error("Error submitting questions:", error);
+      ToastContainerComponent.error("Error creating exam questions:");
+    } finally {
+      setLoading(false);
     }
   };
+  const departmentOptions =
+    courseDetails.length > 0
+      ? courseDetails.map((course: any) => ({
+          label: course.department,
+          value: course.department,
+        }))
+      : [];
+
+  const facultyOptions =
+    courseDetails.length > 0
+      ? courseDetails.map((course: any) => ({
+          label: course.faculty,
+          value: course.faculty,
+        }))
+      : [];
+
+  const courseCodeOptions =
+    courseDetails.length > 0
+      ? courseDetails.map((course: any) => ({
+          label: course.courseCode,
+          value: course.courseCode,
+        }))
+      : [];
+
   return (
-    <div className="set-exams-page-whole-container">
+    <div className="flex min-h-screen">
       {/* Sidebar */}
       <LecturerSideBar />
 
       {/* Main content */}
-      <main className="set-exams-page-main-section">
+      <main className="flex flex-col items-center ml-[20%] w-[80%]">
         {/* set exams heading wrapper */}
         {lecturerData && (
           <Header newUser={lecturerData.title + " " + lecturerData.firstName} />
         )}
-        <div className="set-exams-inner-wrapper">
-          <div className="set-exams-page-main-section-title-container">
-            <h1 className="set-exams-page-main-section-title">Set Exams</h1>
+        <div className="w-[90%] mb-8">
+          <div className="my-4">
+            <h1 className="font-semibold text-[32px]">Set Exams</h1>
           </div>
           {/* set exam form wrapper */}
-          <div className="set-exams-page-all-forms">
-            <div>
-              <div className="set-exams-page-session-form-container">
-                {/* add modal pop up fixed position */}
-                {popup && (
-                  <div className="add-section-pop-up">
-                    <div className="inner-pop-up">
-                      <h1>Add Section</h1>
-                      <form onSubmit={handleAddSectionModalSubmitForm}>
-                        <fieldset className="set-exam-page-modal-fieldset">
-                          <label htmlFor=""> Section</label>
-                          <input
-                            type="text"
-                            className="section-detail"
-                            value={sectionDetail.sectionAlphabet}
-                            onChange={(e) =>
-                              setSectionDetail({
-                                ...sectionDetail,
-                                sectionAlphabet: e.target.value,
-                              })
-                            }
-                            placeholder="Type section number or alphabet"
+          <div className="overflow-y-scroll flex flex-col flex-wrap">
+            <div className="">
+              {/* add modal pop up fixed position */}
+              {popup && (
+                <div className="h-screen w-[80%] ml-[20%] fixed z-50 top-0 left-0 bg-[#212121f8] backdrop-filter backdrop-blur-[10px] flex items-center justify-center">
+                  <div className="w-[35%] p-8 bg-white rounded-2xl  pointer-events-auto">
+                    <h1 className="text-2xl font-semibold mb-4">Add Section</h1>
+                    <Formik
+                      initialValues={{
+                        sectionAlphabet: "",
+                        scoreObtainable: "",
+                        questionType: "",
+                      }}
+                      validationSchema={sectionSchema}
+                      onSubmit={handleAddSectionModalSubmitForm}
+                    >
+                      <Form>
+                        <LightAuthInput
+                          label="Section"
+                          name="sectionAlphabet"
+                          type="text"
+                          placeholder="Type section number or alphabet"
+                          className="w-full"
+                        />
+                        <LightAuthInput
+                          label="Score Obtainable"
+                          name="scoreObtainable"
+                          type="text"
+                          placeholder="Enter total marks in section"
+                          className="w-full mt-4"
+                        />
+                        <div className="flex flex-row gap-4 justify-evenly my-4">
+                          <p>
+                            Question Type <br />{" "}
+                            <span className="text-textcolor text-[12px]">
+                              Select 1 section at a time
+                            </span>
+                          </p>
+                          <RadioInput
+                            name="questionType"
+                            label=""
+                            options={[
+                              {
+                                label: "Multiple Choice",
+                                value: "MultipleChoice",
+                              },
+                              {
+                                label: "Fill in the Blank",
+                                value: "FillInTheBlank",
+                              },
+                              { label: "Theory", value: "Theory" },
+                            ]}
                           />
-                        </fieldset>
-                        <fieldset className="set-exam-page-modal-fieldset">
-                          <label htmlFor=""> Score obtainable</label>
-                          <input
-                            type="text"
-                            className="section-detail"
-                            placeholder="Enter total marks in section"
-                            value={sectionDetail.ScoreObtainable}
-                            onChange={(e) =>
-                              setSectionDetail({
-                                ...sectionDetail,
-                                ScoreObtainable: e.target.value,
-                              })
-                            }
-                          />
-                        </fieldset>
-                        <fieldset className="add-section-fieldset">
-                          <div className="add-section-instruction">
-                            <p>
-                              {" "}
-                              Question Type <br />{" "}
-                              <span className="set-exams-page-modal-selection-question">
-                                Select 1 section at a time
-                              </span>
-                            </p>
-                          </div>
-                          <div className="add-section-type-wrapper">
-                            <fieldset className="set-exams-page-modal-question-type-input">
-                              <input
-                                name="setSectionType"
-                                type="radio"
-                                id="Multiple-choice"
-                                value="MultipleChoice"
-                                onChange={(e) =>
-                                  setSectionDetail({
-                                    ...sectionDetail,
-                                    questionType: e.target.value,
-                                  })
-                                }
-                              />
-                              <label htmlFor="Multiple-choice">
-                                {" "}
-                                Multiple Choice{" "}
-                              </label>
-                            </fieldset>
-                            <fieldset className="set-exams-page-modal-question-type-input">
-                              <input
-                                name="setSectionType"
-                                type="radio"
-                                id="Fill-in-the-blank"
-                                value="FillInTheBlank"
-                                onChange={(e) =>
-                                  setSectionDetail({
-                                    ...sectionDetail,
-                                    questionType: e.target.value,
-                                  })
-                                }
-                              />
-                              <label htmlFor="Fill-in-the-blank">
-                                {" "}
-                                Fill in the blanks{" "}
-                              </label>
-                            </fieldset>
-                            <fieldset className="set-exams-page-modal-question-type-input">
-                              <input
-                                name="setSectionType"
-                                type="radio"
-                                id="Theory"
-                                value="Theory"
-                                onChange={(e) =>
-                                  setSectionDetail({
-                                    ...sectionDetail,
-                                    questionType: e.target.value,
-                                  })
-                                }
-                                // checked={sectionDetail.Theory.checked}
-
-                                // onChange={(e) =>
-                                //   setSectionDetail({
-                                //     ...sectionDetail,
-                                //     Theory: {
-                                //       ...sectionDetail.Theory,
-                                //       checked: e.target.checked,
-                                //     },
-                                //   })
-                                // }
-                              />
-                              <label htmlFor="Theory"> Theory</label>
-                            </fieldset>
-                          </div>
-                        </fieldset>
-                        <div className="set-exams-page-modal-buttons-container">
+                        </div>
+                        <div className="flex justify-evenly gap-4">
                           <button
-                            className="set-exams-page-modal-button"
+                            className=" bg-authbordercolor rounded p-2 flex justify-center items-center w-[7rem]"
                             type="button"
                             onClick={toggleAddSectionModal}
                           >
                             Cancel
                           </button>
                           <button
-                            className="set-exams-page-modal-button"
+                            className={`bg-primaryVarrounded p-2 flex justify-center items-center w-[7rem] `}
                             type="submit"
                           >
                             Add Section
                           </button>
                         </div>
-                      </form>
-                    </div>
+                      </Form>
+                    </Formik>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* all set main set exam form */}
-                <form
-                  className="set-exams-page-session-form"
-                  onSubmit={submitQuestions}
-                >
+              {/* all set main set exam form */}
+              <Formik
+                initialValues={{
+                  session: "",
+                  semester: "",
+                  faculty: "",
+                  department: "",
+                  courseCode: "",
+                  examDate: "",
+                  instruction: "",
+                  courseTitle: "",
+                  sections: sectionValue,
+                  totalScore: Number(totalScore),
+                  questions: assembledQuestions,
+                  examDuration: "",
+                  lecturerId: lecturerData?.lecturerId,
+                }}
+                onSubmit={submitQuestions}
+              >
+                <Form className="" onSubmit={submitQuestions}>
                   {/* course details to be fectched from backend */}
                   <div className="set-exams-top-form-wrapper">
                     <div className="set-exams-page-session-form-row">
-                      <div className="set-exams-page-form-label-and-inputs">
-                        <label
-                          className="set-exams-page-session-form-label"
-                          htmlFor="sessionInput"
-                        >
-                          Session
-                        </label>
-                        <br />
-                        <select
-                          className="set-exams-page-session-form-input"
-                          name="session"
-                          id="sessionInput"
-                          value={session}
-                          onChange={(e) => setSession(e.target.value)}
-                        >
-                          <option value="Please select">Please Select</option>
-                          <option defaultValue="2023/2024">2023/2024</option>
-                        </select>
-                      </div>
+                      <SelectInputWithLabel
+                        name="session"
+                        label="Session"
+                        placeholder="Select session"
+                        options={[
+                          {
+                            label: "2023/2024",
+                            value: "2023/2024",
+                          },
+                        ]}
+                      />
 
-                      <div className="set-exams-page-form-label-and-inputs">
-                        <label
-                          className="set-exams-page-session-form-label"
-                          htmlFor="semesterInput"
-                        >
-                          Semester
-                        </label>
-                        <br />
-                        <select
-                          className="set-exams-page-session-form-input"
-                          name="semester"
-                          id="semesterInput"
-                          value={semester}
-                          onChange={(e) => setSemester(e.target.value)}
-                        >
-                          <option value="">Select</option>
-                          <option value="first semester">First</option>
-                          <option value="second semester">Second</option>
-                        </select>
-                      </div>
+                      <SelectInputWithLabel
+                        name="semester"
+                        label="Semester"
+                        placeholder="Select semester"
+                        options={[
+                          {
+                            label: "First Semester",
+                            value: "first semester",
+                          },
+                          {
+                            label: "Second Semester",
+                            value: "second semester",
+                          },
+                        ]}
+                      />
 
-                      <div className="set-exams-page-form-label-and-inputs">
-                        <label
-                          className="set-exams-page-session-form-label"
-                          htmlFor="facultyInput"
-                        >
-                          Faculty
-                        </label>
-                        <br />
-                        <select
-                          className="set-exams-page-session-form-input"
-                          name="semester"
-                          id="semesterInput"
-                          value={faculty}
-                          onChange={(e) => setFaculty(e.target.value)}
-                        >
-                          <option value="Please select">Please Select</option>
-                          {courseDetails.length > 0 ? (
-                            courseDetails.map(
-                              (
-                                course: Record<string, unknown>,
-                                index: number
-                              ) => (
-                                <option
-                                  value={course.faculty as string}
-                                  key={index}
-                                >
-                                  {course.faculty as string}
-                                </option>
-                              )
-                            )
-                          ) : (
-                            <option value="fetching">fetching..</option>
-                          )}
-                        </select>
-                      </div>
+                      <SelectInputExam
+                        name="faculty"
+                        label="Faculty"
+                        placeholder="Select faculty"
+                        options={facultyOptions}
+                      />
 
-                      <div className="set-exams-page-form-label-and-inputs">
-                        <label
-                          className="set-exams-page-session-form-label"
-                          htmlFor="departmentInput"
-                        >
-                          Department
-                        </label>
-                        <br />
-                        <select
-                          className="set-exams-page-session-form-input"
-                          name="semester"
-                          id="semesterInput"
-                          value={department}
-                          onChange={(e) => setDepartment(e.target.value)}
-                        >
-                          <option value="Please select">Please Select</option>
-                          {courseDetails.length > 0 ? (
-                            courseDetails.map(
-                              (
-                                course: Record<string, unknown>,
-                                index: number
-                              ) => (
-                                <option
-                                  value={course.department as string}
-                                  key={index}
-                                >
-                                  {course.department as string}
-                                </option>
-                              )
-                            )
-                          ) : (
-                            <option value="fetching">fetching..</option>
-                          )}
-                        </select>
-                      </div>
+                      <SelectInputExam
+                        name="department"
+                        label="Department"
+                        placeholder="Select Department"
+                        options={departmentOptions}
+                      />
                     </div>
 
                     <div className="set-exams-page-session-form-row">
-                      <div className="set-exams-page-form-label-and-inputs">
-                        <label
-                          className="set-exams-page-session-form-label"
-                          htmlFor="courseCodeInput"
-                        >
-                          Course Code
-                        </label>
-                        <br />
-                        <select
-                          className="set-exams-page-session-form-input"
-                          name="semester"
-                          id="semesterInput"
-                          value={courseCode}
-                          onChange={(e) => setCourseCode(e.target.value)}
-                        >
-                          <option value="Please select">Please Select</option>
-                          {courseDetails.length > 0 ? (
-                            courseDetails.map(
-                              (
-                                course: Record<string, unknown>,
-                                index: number
-                              ) => (
-                                <option
-                                  value={course.courseCode as string}
-                                  key={index}
-                                >
-                                  {course.courseCode as string}
-                                </option>
-                              )
-                            )
-                          ) : (
-                            <option value="fetching">fetching..</option>
-                          )}
-                        </select>
-                      </div>
+                      <SelectInputExam
+                        name="courseCode"
+                        label="Course Code"
+                        placeholder="Select Course Code"
+                        options={courseCodeOptions}
+                      />
 
-                      <div className="set-exams-page-form-label-and-inputs">
-                        <label
-                          className="set-exams-page-session-form-label"
-                          htmlFor="courseTitleInput"
-                        >
-                          Course Title
-                        </label>
-                        <br />
-                        <select
-                          className="set-exams-page-session-form-input"
-                          name="semester"
-                          id="semesterInput"
-                          value={courseTitle}
-                          onChange={(e) => setCourseTitle(e.target.value)}
-                        >
-                          <option value="Please select">Please Select</option>
-                          {courseDetails.length > 0 ? (
-                            courseDetails.map(
-                              (
-                                course: Record<string, unknown>,
-                                index: number
-                              ) => (
-                                <option
-                                  value={course.courseTitle as string}
-                                  key={index}
-                                >
-                                  {course.courseTitle as string}
-                                </option>
-                              )
-                            )
-                          ) : (
-                            <option value="fetching">fetching..</option>
-                          )}
-                        </select>
-                      </div>
+                      <SelectInputExam
+                        name="courseTitle"
+                        label="Course Title"
+                        placeholder="Select Course Title"
+                        options={courseCodeOptions}
+                      />
 
-                      <div className="set-exams-page-form-label-and-inputs">
-                        <label
-                          className="set-exams-page-session-form-label"
-                          htmlFor="totalScoreInput"
-                        >
-                          Total Score
-                        </label>
-                        <br />
-                        <input
-                          className="set-exams-page-session-form-input"
-                          placeholder="Type Obtainable Score"
-                          type="number"
-                          id="totalScoreInput"
-                          name="totalScore"
-                          value={totalScore}
-                          onChange={(e) => setTotalScore(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="set-exams-page-form-label-and-inputs">
-                        <label
-                          className="set-exams-page-session-form-label"
-                          htmlFor="timeAllowedInput"
-                        >
-                          Time allowed
-                        </label>
-                        <br />
-                        <input
-                          className="set-exams-page-session-form-input"
-                          placeholder="60 mins"
-                          type="text"
-                          id="timeAllowedInput"
-                          name="timeAllowed"
-                          value={examDuration}
-                          onChange={(e) => setexamDuration(e.target.value)}
-                        />
-                      </div>
+                      <LightAuthInput
+                        name="totalScore"
+                        type="number"
+                        placeholder="Enter total score"
+                        label="Total Score"
+                      />
+                      <LightAuthInput
+                        name="examDuration"
+                        type="text"
+                        placeholder="Enter time allowed"
+                        label="Time Allowed"
+                      />
                     </div>
 
                     <div className="set-exams-page-session-form-instruction-row">
-                      <label
-                        htmlFor="dateInput"
-                        className="set-exams-session-date-wrapper"
-                      >
-                        Date
-                        <br />
-                        <input
-                          type="datetime-local"
-                          className="set-exams-page-session-form-date-input"
-                          value={examDate}
-                          onChange={(e) => setExamDate(e.target.value)}
-                          id="dateInput"
-                          name="examDate"
-                        />
-                      </label>
-                      <label
-                        className="set-exams-session-instructions-wrapper"
-                        htmlFor="instructionsInput"
-                      >
-                        Instructions
-                        <br />
-                        <input
-                          className="set-exams-page-session-form-instructions-input"
-                          placeholder="Type Instructions"
-                          type="text"
-                          value={instruction}
-                          onChange={(e) => setInstruction(e.target.value)}
-                          id="instructionsInput"
-                          name="instructions"
-                        />
-                      </label>{" "}
+                      <LightAuthInput
+                        name="examDuration"
+                        type="datetime-local"
+                        placeholder="Enter date"
+                        label="Date"
+                      />
+                      <LightAuthInput
+                        name="instruction"
+                        type="text"
+                        placeholder="Enter instructions"
+                        label="Exam Instructions"
+                      />{" "}
                     </div>
 
                     <button
@@ -792,7 +572,7 @@ function SetExamPage() {
                                     .map((section) => {
                                       return (
                                         <>
-                                          {section.ScoreObtainable}
+                                          {section.scoreObtainable}
                                           Marks
                                         </>
                                       );
@@ -837,9 +617,10 @@ function SetExamPage() {
                                             htmlFor=""
                                           >
                                             A.
-                                            <input
+                                            <LightAuthInput
+                                              name=""
                                               type="text"
-                                              className="options-text"
+                                              label=""
                                               placeholder="Option A"
                                               value={question.optionA}
                                               onChange={(e) =>
@@ -851,9 +632,15 @@ function SetExamPage() {
                                                 )
                                               }
                                             />
-                                            <input
-                                              type="radio"
+                                            <RadioInput
                                               name={`question${questionIndex}`}
+                                              label=""
+                                              options={[
+                                                { label: "A", value: "A" },
+                                                { label: "B", value: "B" },
+                                                { label: "C", value: "C" },
+                                                { label: "D", value: "D" },
+                                              ]}
                                               value={question.optionA}
                                               checked={
                                                 (
@@ -880,10 +667,11 @@ function SetExamPage() {
                                             htmlFor=""
                                           >
                                             B.
-                                            <input
+                                            <LightAuthInput
+                                              name=""
                                               type="text"
+                                              label=""
                                               placeholder="Option B"
-                                              className="options-text"
                                               value={question.optionB}
                                               onChange={(e) =>
                                                 handleQuestionChange(
@@ -894,9 +682,15 @@ function SetExamPage() {
                                                 )
                                               }
                                             />
-                                            <input
-                                              type="radio"
+                                            <RadioInput
                                               name={`question${questionIndex}`}
+                                              label=""
+                                              options={[
+                                                { label: "A", value: "A" },
+                                                { label: "B", value: "B" },
+                                                { label: "C", value: "C" },
+                                                { label: "D", value: "D" },
+                                              ]}
                                               value={question.optionB}
                                               checked={
                                                 (
@@ -923,10 +717,11 @@ function SetExamPage() {
                                             htmlFor=""
                                           >
                                             C.
-                                            <input
+                                            <LightAuthInput
+                                              name=""
                                               type="text"
+                                              label=""
                                               placeholder="Option C"
-                                              className="options-text"
                                               value={question.optionC}
                                               onChange={(e) =>
                                                 handleQuestionChange(
@@ -937,9 +732,15 @@ function SetExamPage() {
                                                 )
                                               }
                                             />
-                                            <input
-                                              type="radio"
+                                            <RadioInput
                                               name={`question${questionIndex}`}
+                                              label=""
+                                              options={[
+                                                { label: "A", value: "A" },
+                                                { label: "B", value: "B" },
+                                                { label: "C", value: "C" },
+                                                { label: "D", value: "D" },
+                                              ]}
                                               value={question.optionC}
                                               checked={
                                                 (
@@ -966,10 +767,11 @@ function SetExamPage() {
                                             htmlFor=""
                                           >
                                             D.
-                                            <input
+                                            <LightAuthInput
+                                              name=""
                                               type="text"
+                                              label=""
                                               placeholder="Option D"
-                                              className="options-text"
                                               value={question.optionD}
                                               onChange={(e) =>
                                                 handleQuestionChange(
@@ -980,9 +782,15 @@ function SetExamPage() {
                                                 )
                                               }
                                             />
-                                            <input
-                                              type="radio"
+                                            <RadioInput
                                               name={`question${questionIndex}`}
+                                              label=""
+                                              options={[
+                                                { label: "A", value: "A" },
+                                                { label: "B", value: "B" },
+                                                { label: "C", value: "C" },
+                                                { label: "D", value: "D" },
+                                              ]}
                                               value={question.optionD}
                                               checked={
                                                 (
@@ -1064,7 +872,7 @@ function SetExamPage() {
                                     .map((section) => {
                                       return (
                                         <>
-                                          {section.ScoreObtainable}
+                                          {section.scoreObtainable}
                                           Marks
                                         </>
                                       );
@@ -1160,7 +968,7 @@ function SetExamPage() {
                                     .map((section) => {
                                       return (
                                         <>
-                                          {section.ScoreObtainable}
+                                          {section.scoreObtainable}
                                           Marks
                                         </>
                                       );
@@ -1259,8 +1067,8 @@ function SetExamPage() {
                       </div>
                     </div>
                   </div>
-                </form>
-              </div>
+                </Form>
+              </Formik>
             </div>
           </div>
         </div>

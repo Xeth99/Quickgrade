@@ -2,7 +2,7 @@ import axios from "axios";
 
 // backend url
 const axiosInstance = axios.create({
-  baseURL: "https://quickgrade-server.onrender.com",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 

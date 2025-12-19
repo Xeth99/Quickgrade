@@ -1,8 +1,6 @@
-import { LoginPage } from "../Auth/loginPage/Login";
+import LoginPage from "../Auth/loginPage/Login";
 // import "../../index.css";
 // import "./App.css";
-import student_login_page_bg from "../../assets/loginBackground.png";
-import lecturer_login_page_bg from "../../assets/lecturer_signin_bg.png";
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "../landingPage/LandingPage";
 import EnterOtp from "../Auth/enter-otp/enter_otp";
@@ -102,31 +100,9 @@ function App() {
           }
         />
 
-        <Route
-          path="/students/signin"
-          element={
-            <LoginPage
-              form_title="Sign into QuickGrade"
-              id_or_email="Student Registration Number"
-              placeholder="Enter your registration number"
-              backgroundimage={student_login_page_bg}
-              userType="/students/forgot-password"
-            />
-          }
-        />
+        <Route path="/students/signin" element={<LoginPage />} />
 
-        <Route
-          path="/lecturers/signin"
-          element={
-            <LoginPage
-              form_title="Sign into QuickGrade"
-              id_or_email="Employee ID"
-              placeholder="Enter employee id"
-              backgroundimage={lecturer_login_page_bg}
-              userType="/lecturers/forgot-password"
-            />
-          }
-        />
+        <Route path="/lecturers/signin" element={<LoginPage />} />
         <Route path="/students/confirm-email" element={<EnterOtp />} />
         <Route path="/lecturers/confirm-email" element={<EnterOtp />} />
         {/* forgot password page

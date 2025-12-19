@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import axiosInstance from "../../../utils/axiosInstance";
 import Header from "../../../components/header/header";
 import { useAuth } from "../../../components/protectedRoutes/protectedRoute";
+import ToastContainerComponent from "../../../components/notifications/Notifications";
 
 interface Exam {
   courseCode: string;
@@ -22,6 +23,9 @@ function LecturerDashboard() {
 
   const [examData, setExamData] = useState<Exam[]>([]);
 
+  const baseStyle = "border-t border-[#98A2B3] border-b py-[1rem] px-[0.6rem]";
+  const thStyle = "px-[0.4rem]";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,7 +35,7 @@ function LecturerDashboard() {
           setExamData(res.data.examsTotal);
         }
       } catch (error) {
-        console.log("Error fetching dashboard data:", error);
+        ToastContainerComponent.error("Error fetching dashboard data:");
       }
     };
 
@@ -39,63 +43,62 @@ function LecturerDashboard() {
   }, []);
 
   return (
-    <div className="lecturer-dashboard-container">
+    <div className="flex w-full">
       <LecturerSideBar />
 
-      <div className="lecturer-dashboard-body">
+      <div className="w-[80%] ml-[20%]">
         {lecturerData && (
-          <Header newUser={lecturerData.title + " " + lecturerData.firstName} />
+          <Header newUser={lecturerData.title + " " + lecturerData.lastName} />
         )}
         <div className="heading-dashboard">Dashboard</div>
 
-        <div className="lecturer-blue-header">
+        <div className="bg-primary w-[90%]  my-8 mx-auto p-6 rounded-2xl items-center">
           {lecturerData && (
-            <div className="lecturer-blue-header-content">
+            <div className="text-white font-semibold">
               <p>
-                Lecturer ({lecturerData.title} {lecturerData.firstName}),
-                Department of {lecturerData?.department},
-              </p>
+                {lecturerData.title} {lecturerData.firstName}{" "}
+                {lecturerData.lastName},
+              </p>{" "}
+              <p>Department of {lecturerData?.department},</p>
               <p>Faculty of {lecturerData?.faculty}</p>
               <p>Camouflage University</p>
-              <p>Atlanta, Nigeria</p>
+              <p>Lagos, Nigeria</p>
             </div>
           )}
         </div>
 
         {/* Main content */}
-        <main className="lecturer-dashboard-exam-timetable-container">
+        <main className="w-[90%] mx-auto">
           <div className="lecturer-dashboard-semester-session-container">
             2022/2023 : First Semester
           </div>
 
-          <div className="lecturer-dashboard-exam-timetable-header">
-            Course Examination TimeTable
-          </div>
+          <div className="font-semibold">Course Examination TimeTable</div>
 
           {examData && examData.length > 0 && (
-            <table className="lecturer-exam-timetable">
+            <table className="border-collapse border-spacing-8 table-auto w-[96%] mx-4 my-4">
               <thead>
                 <tr>
-                  <th>Course Code</th>
-                  <th>Department</th>
-                  <th>Exam Date</th>
-                  <th>Venue</th>
-                  <th>Registered</th>
-                  <th>Action</th>
+                  <th className={thStyle}>Course Code</th>
+                  <th className={thStyle}>Department</th>
+                  <th className={thStyle}>Exam Date</th>
+                  <th className={thStyle}>Venue</th>
+                  <th className={thStyle}>Registered</th>
+                  <th className={thStyle}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {examData.map((exam, index) => (
                   <tr className="lecturer-exam-timetable-row" key={index}>
-                    <td>{exam.courseCode}</td>
-                    <td>{exam.department}</td>
+                    <td className={baseStyle}>{exam.courseCode}</td>
+                    <td className={baseStyle}>{exam.department}</td>
                     <td className="date-column">
                       {format(exam.examDate, "d MMM,yyyy / h:mmaa")}
                     </td>
-                    <td>Campus E-center</td>
-                    <td>{exam.noOfStudents}</td>
+                    <td className={baseStyle}>Campus E-center</td>
+                    <td className={`${baseStyle} w-[20%]`} >{exam.noOfStudents}</td>
                     <td>
-                      <button>
+                      <button className="rounded-md bg-primary text-white p-2 w-full">
                         <p>Set Exam</p>
                       </button>
                     </td>
